@@ -20,8 +20,8 @@ public class MyBlockingList {
 
 
     public String put(String value) throws InterruptedException {
-        Node newNode = new Node(value, null);
         lock.lock();
+        Node newNode = new Node(value, null);
         try {
             if (isEmpty()){
                 headNode.next=newNode;

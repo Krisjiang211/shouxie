@@ -8,6 +8,7 @@ import java.io.Serializable;
 import lombok.Data;
 
 /**
+ * @author KrisJiang
  * @TableName user
  */
 @TableName(value ="user")
@@ -22,5 +23,10 @@ public class User implements Serializable {
 
     private String email;
 
+
     private static final long serialVersionUID = 1L;
+
+//    public Object getId(Object o) {
+//        return null;
+//    }
 }

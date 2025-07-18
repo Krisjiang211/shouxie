@@ -1,9 +1,10 @@
 package com.jiang.singlelearningdemo.proxy.core;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+//import com.baomidou.mybatisplus.annotation.TableName;
 import com.jiang.singlelearningdemo.proxy.core.annotation.Param;
+import com.jiang.singlelearningdemo.proxy.core.annotation.TableName;
 import com.jiang.singlelearningdemo.proxy.core.pojo.User;
-import org.apache.ibatis.binding.MapperProxy;
+//import org.apache.ibatis.binding.MapperProxy;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -18,6 +19,9 @@ public class SqlSessionFactory {
 
     @SuppressWarnings("unchecked")
     public <T> T getMapper(Class<T> clazz){
+
+
+
         return (T) Proxy.newProxyInstance(clazz.getClassLoader(),
                 new Class[]{clazz},//代理的接口列表(这里表示只代理当前的接口)
                 new FunInvokeHandler());

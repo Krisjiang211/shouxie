@@ -4,8 +4,8 @@ import java.util.*;
 
 public class RemoveElem {
 
-    List<Integer> bigList=new ArrayList<>();
-    List<Integer> subList=new ArrayList<>();
+    List<Integer> bigList=new ArrayList<>();//这是一个大集合
+    List<Integer> subList=new ArrayList<>();//这是一个小集合(大集合的子集合)
     public static void main(String[] args) {
         RemoveElem removeElem = new RemoveElem();
         removeElem.initList();
@@ -38,7 +38,7 @@ public class RemoveElem {
         Random random = new Random();
         for (int i = 0; i < 999999; i++) {
             bigList.add(i);
-            Boolean aBoolean = (random.nextInt(0, 10) % 10) == 0 ? subList.add(i) : null;
+            Boolean aBoolean = (random.nextInt(0, 10) % 10) == 0 ? subList.add(i) : null;// 10%的数据作为子集合
         }
     }
 
