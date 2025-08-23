@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author KrisJiang
@@ -13,6 +14,7 @@ import lombok.Data;
  */
 @TableName(value ="user")
 @Data
+@NoArgsConstructor
 public class User implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -25,6 +27,12 @@ public class User implements Serializable {
 
 
     private static final long serialVersionUID = 1L;
+
+    public User(String name, Integer age, String email) {
+        this.name = name;
+        this.age = age;
+        this.email = email;
+    }
 
 //    public Object getId(Object o) {
 //        return null;
