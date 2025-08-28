@@ -1,6 +1,7 @@
 package com.jiang.singlelearningdemo.objPool.test;
 
 import com.jiang.singlelearningdemo.common.pojo.PlainUser;
+import com.jiang.singlelearningdemo.objPool.HashTableDataStructure;
 import com.jiang.singlelearningdemo.objPool.QueueDataStructure;
 import com.jiang.singlelearningdemo.objPool.defaultImpl.DefaultObjPoolUtil;
 import com.jiang.singlelearningdemo.objPool.ObjPool;
@@ -26,12 +27,13 @@ public class ObjPoolTest {
 
     private static final HashMap<Class<?>, Object> constructorMap = new HashMap<>();
 
-    private final QueueDataStructure<PlainUser> queueDataStructure =QueueDataStructure.newDefault(2,new PlainUserGivebackStrategy());
+//    private final QueueDataStructure<PlainUser> queueDataStructure =QueueDataStructure.newDefault(2,new PlainUserGivebackStrategy());
 
+    private final HashTableDataStructure<PlainUser> dataStructure = HashTableDataStructure.newDefault(2,new PlainUserGivebackStrategy());
     private final ObjPool<PlainUser> objPool = ObjPool.newDefaultObjPool("User类对象池",
             PlainUser.class,
             constructorMap,
-            queueDataStructure);
+            dataStructure);
 
 
     @GetMapping("status")

@@ -171,7 +171,13 @@ public class ObjPool<T> {
         private boolean isLegal;//是否是触发拒绝策略的
 
 
-        private Obj(){}
+        protected Obj(){}
+        protected Obj(T obj, Integer id, String msg, boolean isLegal) {
+            this.obj = obj;
+            this.id = id;
+            this.msg = msg;
+            this.isLegal = isLegal;
+        }
 
         public static <T> Obj<T> getInstance(T t){
             Obj<T> instance = new Obj<>();
@@ -209,6 +215,10 @@ public class ObjPool<T> {
 
         public T getObj() {
             return obj;
+        }
+
+        public String getMsg() {
+            return msg;
         }
 
         public boolean isLegal() {

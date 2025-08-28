@@ -1,6 +1,5 @@
 package com.jiang.singlelearningdemo.objPool;
 
-import com.jiang.singlelearningdemo.objPool.ObjPool;
 import com.jiang.singlelearningdemo.objPool.defaultImpl.DefaultRejectStrategy;
 import com.jiang.singlelearningdemo.objPool.utils.GiveBackStrategy;
 import com.jiang.singlelearningdemo.objPool.utils.ObjPoolUtil;
@@ -15,7 +14,7 @@ public abstract class DataStructure<T> {
 
     protected int nums;//容量
 
-    protected Collection<ObjPool.Obj<T>> container;
+    protected Collection<? extends ObjPool.Obj<T>> container;
 
     protected RejectStrategy<T> rejectStrategy;//拒绝策略: 当申请对象遭拒绝后的操作
     protected GiveBackStrategy<T> giveBackStrategy;//归还策略: 当归还对象的时候需要如何重置对象.
@@ -41,8 +40,11 @@ public abstract class DataStructure<T> {
         }
     }
 
+    //初始化对象池的时候添加对象
     protected abstract void offer(ObjPool.Obj<T> obj);
 
+    //尝试一次获取元素
+    protected abstract ObjPool.Obj<T> tryApply();
 
     //从对象池申请一个对象(阻塞, 直到申请到为止)
     public abstract ObjPool.Obj<T> apply();

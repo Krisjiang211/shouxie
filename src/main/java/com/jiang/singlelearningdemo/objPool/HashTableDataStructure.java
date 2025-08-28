@@ -3,56 +3,46 @@ package com.jiang.singlelearningdemo.objPool;
 import com.jiang.singlelearningdemo.objPool.domain.NeedNewFlag;
 import com.jiang.singlelearningdemo.objPool.utils.GiveBackStrategy;
 import com.jiang.singlelearningdemo.objPool.utils.RejectStrategy;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class QueueDataStructure<T> extends DataStructure<T> {
-
-    protected final ArrayBlockingQueue<ObjPool.Obj<T>> queue;
-
-    protected QueueDataStructure(int nums,
-                              Constructor<T> constructor,
-                              Object[] originObjValues,
-                              RejectStrategy<T> rejectStrategy,
-                              GiveBackStrategy<T> giveBackStrategy) {
+public class HashTableDataStructure<T> extends DataStructure<T> {
+    private final HashTable<T> table;
+    public HashTableDataStructure(int nums, Constructor<T> constructor, Object[] originObjValues, RejectStrategy<T> rejectStrategy, GiveBackStrategy<T> giveBackStrategy) {
         super(nums, constructor, originObjValues, rejectStrategy, giveBackStrategy);
-        queue = new ArrayBlockingQueue<>(nums);
-        container=queue;
+        table=new HashTable<>(nums,5);
+        container=table;
     }
 
-    public static <T> QueueDataStructure<T> newDefault(int nums,RejectStrategy<T> rejectStrategy, GiveBackStrategy<T> giveBackStrategy){
-        return new QueueDataStructure<>(nums,null,null,rejectStrategy,giveBackStrategy);
+    public static <T> HashTableDataStructure<T> newDefault(int nums,  RejectStrategy<T> rejectStrategy, GiveBackStrategy<T> giveBackStrategy){
+        return new HashTableDataStructure<>(nums,null,null,rejectStrategy,giveBackStrategy);
     }
-    public static <T> QueueDataStructure<T> newDefault(int nums, GiveBackStrategy<T> giveBackStrategy){
+
+    public static <T> HashTableDataStructure<T> newDefault(int nums, GiveBackStrategy<T> giveBackStrategy){
         return newDefault(nums,null,giveBackStrategy);
     }
+
     @Override
     protected void offer(ObjPool.Obj<T> obj) {
-        queue.offer(obj);
+        table.offer(obj);
     }
 
     @Override
-    protected ObjPool.Obj<T> tryApply() {
-        return queue.poll();
+    public ObjPool.Obj<T> tryApply(){
+        return table.tryApply();
     }
-
 
     @Override
     public ObjPool.Obj<T> apply() {
-        try {
-            return queue.take();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return table.apply();
     }
 
     @Override
-    public ObjPool.Obj<T> apply(long timeout, TimeUnit unit) {
+    public ObjPool.Obj<T> apply(long timeout, TimeUnit timeUnit) {
         ObjPool.Obj<T> poll;
-        try {poll = queue.poll(timeout, unit);}
-        catch (InterruptedException e) {throw new RuntimeException(e);}
+        poll = table.apply(timeout, timeUnit);
         if(poll==null){
             NeedNewFlag flag = NeedNewFlag.getInstance();
 
@@ -75,17 +65,17 @@ public class QueueDataStructure<T> extends DataStructure<T> {
             return false;
         }
         giveBackStrategy.process(obj.getObj());
-        queue.offer(obj);
+        table.offer(obj);
         return true;
     }
 
     @Override
     public int getCapacity() {
-        return nums;
+        return table.getCapacity();
     }
 
     @Override
     public int getAvailableCapacity() {
-        return queue.size();
+        return table.getAvailableCapacity();
     }
 }
