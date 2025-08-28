@@ -12,7 +12,7 @@ public class HashTableDataStructure<T> extends DataStructure<T> {
     private final HashTable<T> table;
     public HashTableDataStructure(int nums, Constructor<T> constructor, Object[] originObjValues, RejectStrategy<T> rejectStrategy, GiveBackStrategy<T> giveBackStrategy) {
         super(nums, constructor, originObjValues, rejectStrategy, giveBackStrategy);
-        table=new HashTable<>(nums,5);
+        table=HashTable.newDefault(nums);
         container=table;
     }
 
@@ -65,8 +65,7 @@ public class HashTableDataStructure<T> extends DataStructure<T> {
             return false;
         }
         giveBackStrategy.process(obj.getObj());
-        table.offer(obj);
-        return true;
+        return table.giveBack(obj);
     }
 
     @Override

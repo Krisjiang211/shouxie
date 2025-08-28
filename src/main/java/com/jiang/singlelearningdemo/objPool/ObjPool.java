@@ -87,17 +87,21 @@ public class ObjPool<T> {
      */
     public String getStatus(){
         StringBuilder hashcodes= new StringBuilder();
+        StringBuilder infos = new StringBuilder();
         if (dataStructure.container.size()>0){
             for (Obj<T> obj : dataStructure.container) {
                 hashcodes.append(obj.hashCode()).append(" ,");
+                infos.append(obj).append("\n");
             }
             hashcodes = new StringBuilder(hashcodes.substring(0, hashcodes.length() - 2));
+            infos = new StringBuilder(infos);
         }
         return "对象池名称: "+name+"\n"+
                 "对象池总大小: "+this.dataStructure.nums+"\n"+
                 "当前对象池可用对象数量: "+String.valueOf(dataStructure.getAvailableCapacity())+"\n"+
                 "当前时间: "+objPoolUtil.dateFormat(LocalDateTime.now())+"\n"+
-                "可用对象hashcode: "+ "["+hashcodes+"]";
+                "容器内对象hashcode: "+ "["+hashcodes+"]"+"\n"+
+                "容器内对象信息: "+ "\n{"+infos+"}";
     }
 
 

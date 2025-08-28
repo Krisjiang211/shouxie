@@ -23,7 +23,9 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
     private final AtomicInteger availableCount;
     private final Elem<T>[] table;
 
-    private Condition stw=new ReentrantLock().newCondition();
+    private ReentrantLock lock =new ReentrantLock();
+    private Condition stw=lock.newCondition();
+
     private volatile boolean isStop=false;
 
     public HashTable(int size,int casThreshold) {
@@ -70,9 +72,9 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
 
 
     public ObjPool.Obj<T> tryApply(){
-        while (isStop){
-            try {stw.await();} catch (InterruptedException e) {throw new RuntimeException(e);}
-        }
+        isIterating();
+
+
         int index = hash();
         Elem<T> elem = table[index];
         if (elem.getUsed().compareAndSet(false,true)) {
@@ -84,9 +86,7 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
 
 
     public ObjPool.Obj<T> apply(){
-        while (isStop){
-            try {stw.await();} catch (InterruptedException e) {throw new RuntimeException(e);}
-        }
+        isIterating();
 
         int index = hash();
         //使用自旋锁来实现
@@ -111,10 +111,7 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
 
     //从对象池申请一个对象(阻塞, 直到申请到或者超时为止)
     public ObjPool.Obj<T> apply(long timeout, TimeUnit timeUnit){
-        //使用循环,防止虚假唤醒
-        while (isStop){
-            try {stw.await();} catch (InterruptedException e) {throw new RuntimeException(e);}
-        }
+        isIterating();
 
         int hash = hash();
         long duration = timeUnit.toMillis(timeout);
@@ -149,10 +146,8 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
 
     //归还一个对象
     public boolean giveBack(ObjPool.Obj<T> obj){
-        while (isStop){
-            try {stw.await();} catch (InterruptedException e) {throw new RuntimeException(e);}
-        }
-
+        isIterating();
+        if (obj==null) return false;
         Integer index = obj.getId();
         AtomicBoolean used = table[index].getUsed();
         used.set(false);
@@ -188,6 +183,14 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
 
 
 
+    private void isIterating(){
+        lock.lock();
+        try {
+            //使用循环,防止虚假唤醒
+            while (isStop){stw.await();}
+        } catch (InterruptedException e) {throw new RuntimeException(e);
+        } finally {lock.unlock();}
+    }
 
 
 
@@ -225,8 +228,10 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
         }
 
         private void resumeTheWorld(){
+            lock.lock();
             isStop = false;
             stw.signalAll();
+            lock.unlock();
         }
     }
 
@@ -237,7 +242,7 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
 
     @Override
     public int size() {
-        return availableCount.get();
+        return size;
     }
 
 
