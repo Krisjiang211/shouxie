@@ -2,6 +2,7 @@ package com.jiang.singlelearningdemo.objPool;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -87,25 +88,19 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
 
     public ObjPool.Obj<T> apply(){
         isIterating();
-
-        int index = hash();
-        //使用自旋锁来实现
-        Elem<T> elem = table[index];
-        AtomicBoolean used = elem.getUsed();
         int times=0;
-        while (!used.compareAndSet(false,true)){
-            //自旋n次依旧无法成功, 返回null, 为下一步拒绝策略准备
+
+        while (true){
+            int index = hash();
+            if (table[index].getUsed().compareAndSet(false,true)) {
+                availableCount.decrementAndGet();
+                return table[index].getObjT();
+            }
             if (times>=casThreshold){
                 return null;
             }
             times++;
-            try {
-                int millis = ThreadLocalRandom.current().nextInt(20, 100);
-                Thread.sleep(millis);} catch (InterruptedException e) {throw new RuntimeException(e);}
         }
-        availableCount.decrementAndGet();
-        return elem.getObjT();
-
     }
 
 
@@ -113,9 +108,9 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
     public ObjPool.Obj<T> apply(long timeout, TimeUnit timeUnit){
         isIterating();
 
-        int hash = hash();
         long duration = timeUnit.toMillis(timeout);
         long start = System.currentTimeMillis();
+        int hash = hash();
         Elem<T> elem = table[hash];
 
         while (true){
@@ -197,7 +192,15 @@ public class HashTable<T> implements Collection<HashTable.Elem<T>> {
 
     //Hash函数
     public int hash(){
-        return ThreadLocalRandom.current().nextInt(0, size);
+        // 使用CPU时间戳，性能极高
+        int i = UUID.randomUUID().hashCode();
+        if (i<0){
+            i=-i;
+        }
+        return i %size;
+//        int cpuTime =(int) System.nanoTime();
+//        int i = cpuTime % size;
+//        return i < 0 ? i + size : i;
     }
 
 

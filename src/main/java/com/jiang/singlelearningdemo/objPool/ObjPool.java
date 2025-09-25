@@ -29,7 +29,7 @@ public class ObjPool<T> {
     private Class<T> clazz;//对象池中的对象类型
     private String name;//对象池名称
     private DataStructure<T> dataStructure;//数据结构
-    private ObjPoolUtil objPoolUtil = new DefaultObjPoolUtil();//其他的一些拓展
+    private ObjPoolUtil objPoolUtil;//其他的一些拓展
 
     public static <T> ObjPool<T> newDefaultObjPool(String name,
                                                    Class<T> clazz,

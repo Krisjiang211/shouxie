@@ -23,6 +23,9 @@ server:
   port: 1314
   servlet:
     context-path: /
+#  tomcat:
+#    threads:
+#      max: 1000
 
 # mybatis-plus
 mybatis-plus:

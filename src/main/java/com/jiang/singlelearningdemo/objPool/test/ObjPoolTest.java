@@ -23,13 +23,11 @@ public class ObjPoolTest {
         constructorMap.put(String.class,"中国");
     }
 
-    private final ExecutorService executors = Executors.newFixedThreadPool(5);
 
     private static final HashMap<Class<?>, Object> constructorMap = new HashMap<>();
 
-//    private final QueueDataStructure<PlainUser> dataStructure =QueueDataStructure.newDefault(1000,new PlainUserGivebackStrategy());
-
-    private final HashTableDataStructure<PlainUser> dataStructure = HashTableDataStructure.newDefault(1000,new PlainUserGivebackStrategy());
+    private final QueueDataStructure<PlainUser> dataStructure =QueueDataStructure.newDefault(1000,new PlainUserGivebackStrategy());
+//    private final HashTableDataStructure<PlainUser> dataStructure = HashTableDataStructure.newDefault(1000,new PlainUserGivebackStrategy());
     private final ObjPool<PlainUser> objPool = ObjPool.newDefaultObjPool("User类对象池",
             PlainUser.class,
             constructorMap,

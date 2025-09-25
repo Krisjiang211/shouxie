@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
@@ -23,6 +24,9 @@ public class TestController {
     @Autowired
     ApplicationContext context;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @PostConstruct
     public void init(){
         System.out.println("ApplicationContext.hashCode() = " + context.hashCode());
@@ -33,6 +37,16 @@ public class TestController {
         System.out.println("map = " + map);
         return map;
     }
+
+
+    @PostMapping("test/user")
+    public User testUser(@RequestBody User user){
+        System.out.println("user = " + user);
+        return user;
+    }
+
+
+
 
     @GetMapping("1")
     public String ok1(HttpServletRequest request){
