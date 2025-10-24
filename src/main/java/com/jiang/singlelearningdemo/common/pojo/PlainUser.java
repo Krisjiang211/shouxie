@@ -1,14 +1,13 @@
 package com.jiang.singlelearningdemo.common.pojo;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import lombok.extern.jackson.Jacksonized;
 
 @Data
 @ToString
-@NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Jacksonized
 public class PlainUser {
 
     private String country;

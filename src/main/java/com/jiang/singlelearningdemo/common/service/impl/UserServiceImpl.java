@@ -26,6 +26,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 .get(0);
 
     }
+
+
+    @Override
+    public User mybatisTest(){
+        return lambdaQuery()
+                .eq(User::getName,"kris")
+                .one();
+    }
 }
 
 

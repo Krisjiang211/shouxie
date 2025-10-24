@@ -1,6 +1,7 @@
 package com.jiang.singlelearningdemo.common.controller;
 
 import com.jiang.singlelearningdemo.common.pojo.User;
+import com.jiang.singlelearningdemo.common.service.UserService;
 import com.jiang.singlelearningdemo.common.util.Result;
 import com.jiang.singlelearningdemo.enhance.ReqBodyTime;
 import jakarta.annotation.PostConstruct;
@@ -26,6 +27,13 @@ public class TestController {
 
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    UserService userService;
+
+    @GetMapping
+    public User get(){
+        return userService.mybatisTest();
+    }
 
     @PostConstruct
     public void init(){
@@ -41,6 +49,7 @@ public class TestController {
 
     @PostMapping("test/user")
     public User testUser(@RequestBody User user){
+
         System.out.println("user = " + user);
         return user;
     }

@@ -31,14 +31,14 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<WebSocketFrame
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         String channelId = channelId(ctx);
         String ip = ip(ctx);
-        log.info(ip+"----"+channelId+"连接成功");
+//        log.info(ip+"----"+channelId+"连接成功");
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         String channelId = channelId(ctx);
         String ip = ip(ctx);
-        log.info(ip+"----"+channelId+"连接已经断开");
+//        log.info(ip+"----"+channelId+"连接已经断开");
     }
 
     private String channelId(ChannelHandlerContext ctx){
