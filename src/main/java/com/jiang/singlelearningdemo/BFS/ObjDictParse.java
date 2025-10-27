@@ -14,6 +14,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
 
+import static org.apache.coyote.http11.Constants.a;
+
 /**
  * @author krisJiang
  * 目前只支持对原生Obj中, 第一层是List的切带有Dict注解的字段进行解析
@@ -26,23 +28,23 @@ public class ObjDictParse {
 
     @SneakyThrows
     public static void main(String[] args) {
-        A a = A.getInstance();
-        ObjDictParse dictParse = new ObjDictParse();
-        for (Level level : dictParse.parseToLevels(a, a.getClass())) {
-            System.out.println(level);
-        }
+//        for (Level level : dictParse.parseToLevels(a, a.getClass())) {
+//            System.out.println(level);
+//        }
         /**
          * ObjDictParse.Level(pathList=[a2], dictValue=a2, dictCode=null, dictText=解析好的值, parsedValueStr=a2dictParse)
          * ObjDictParse.Level(pathList=[b, b2], dictValue=b2, dictCode=null, dictText=解析好的值, parsedValueStr=b2dictParse)
          * ObjDictParse.Level(pathList=[c, c2], dictValue=c2, dictCode=null, dictText=解析好的值, parsedValueStr=c2dictParse)
          * ObjDictParse.Level(pathList=[b, c, c2], dictValue=c2, dictCode=null, dictText=解析好的值, parsedValueStr=c2dictParse)
          */
+        A a = A.getInstance();
+        ObjDictParse dictParse = new ObjDictParse();
         long start = System.currentTimeMillis();
-        JSONObject resJson = dictParse.parse(a,A.class);
+        JSONObject resJson = dictParse.parse(a,A.class,1);
         long end = System.currentTimeMillis();
         System.out.println(resJson+"\n耗时: " + (end - start));
         /**
-         * {"a2":"a2","b":{"b1":"b1","b2":"b2","c":{"c1":"c1","c2":"c2","c2dictParse":"解析好的值"},"b2dictParse":"解析好的值"},"c":{"c1":"c1","c2":"c2","c2dictParse":"解析好的值"},"a2dictParse":"解析好的值"}
+         * {"a2":"a2","b":{"b1":"b1","b2":"b2","c":{"c1":"c1","c2":"c2","c20dictParse":"解析好的值"},"b2dictParse":"解析好的值"},"c":{"c1":"c1","c2":"c2","c2dictParse":"解析好的值"},"a2dictParse":"解析好的值"}
          */
         boolean b = resJson.get("a2") instanceof JSONArray;
         System.out.println("b = " + b);
@@ -54,7 +56,7 @@ public class ObjDictParse {
         int i = 0;
         while (i<20){
             long s = System.currentTimeMillis();
-            System.out.println(dictParse.parse(fenceAlarmHistoryVO, FenceAlarmProcessVO.class));
+            System.out.println(dictParse.parse(fenceAlarmHistoryVO, FenceAlarmProcessVO.class,1));
             long e = System.currentTimeMillis();
             System.out.println("耗时: " + (e - s));
             i++;
@@ -63,10 +65,10 @@ public class ObjDictParse {
 
 
     @SneakyThrows
-    public <T> JSONObject parse(T obj, Class<?> clazz) {
+    public <T> JSONObject parse(T obj, Class<?> clazz, int depth) {
 
         //获取到需要解析的字段的路径
-        List<Level> levels = parseToLevels(obj, clazz);
+        List<Level> levels = parseToLevels(obj, clazz, depth);
         //按照获取的层级, 放入到JSONObject
         JSONObject resJson = JSONObject.parseObject(JSONObject.toJSONString(obj));
         //初步结果
@@ -78,7 +80,7 @@ public class ObjDictParse {
                 JSONArray oneFieldJsonArray = new JSONArray();
                 List<?> listField =(List<?>) field.get(obj);
                 for (Object o : listField) {
-                    JSONObject parse = parse(o, o.getClass());
+                    JSONObject parse = parse(o, o.getClass(), depth);
                     oneFieldJsonArray.add(parse);
                 }
                 formerJSON.put(field.getName(),oneFieldJsonArray);
@@ -130,14 +132,16 @@ public class ObjDictParse {
 
 
     @SneakyThrows
-    public List<Level> parseToLevels(Object obj, Class<?> clazz) {
+    public List<Level> parseToLevels(Object obj, Class<?> clazz, int depth) {
         //先不考虑List这种情况
         List<Level> levels = new ArrayList<>();
         Queue<ClassInfo> queue = new LinkedList<>();
         List<String> currentPath = new ArrayList<>();
         Object fatherObj = obj;
         //广度优先遍历
-        queue.offer(new ClassInfo(clazz,"",currentPath,obj));
+        queue.offer(new ClassInfo(clazz,currentPath,obj));
+        //记录当前遍历的层级
+        int currentDepth = 0;
         while (!queue.isEmpty()){
             //一直要保持一个对象字段的实例, 因为我们需要从他来拿值
             ClassInfo current = queue.poll();
@@ -159,20 +163,18 @@ public class ObjDictParse {
                     pathList.add(name);
                     Level level = Level.builder()
                             .pathList(pathList)
-                            .dictValue(currentObj)
                             .dictText(parseByDictCode(annotation.dicCode(),currentObj))
-                            .dictCode(annotation.dicCode())
                             .parsedValueStr(name+"dictParse").build();//TODO 后来要修改这个解析的值的名字哈
                     levels.add(level);
                     continue;
                 }
                 //如果为java基础类, 那么不入队
                 Class<?> fieldType = field.getType();
+                String typeName = fieldType.getTypeName();
                 if (fieldType.isPrimitive()
-                        || fieldType == String.class
-                        || Number.class.isAssignableFrom(fieldType)
-                        || Boolean.class.isAssignableFrom(fieldType)
-                        || Character.class.isAssignableFrom(fieldType)
+                        || typeName.startsWith("java.")
+                        || typeName.startsWith("javax.")
+                        || typeName.startsWith("jakarta.")
                         || fieldType.isEnum()
                         || fieldType.isArray()) {
                     continue;
@@ -180,11 +182,14 @@ public class ObjDictParse {
                 //如果为其他类, 那么入队
                 List<String> pathList = new ArrayList<>(current.getPathList());
                 pathList.add(name);//路径add
-                queue.offer(new ClassInfo(fieldType,name, pathList,currentObj));
+                queue.offer(new ClassInfo(fieldType, pathList,currentObj));
+            }
+            currentDepth++;
+            //如果超过了深度, 那么跳出循环
+            if (currentDepth>=depth){
+                break;
             }
         }
-
-
         return levels;
     }
 
@@ -204,7 +209,6 @@ public class ObjDictParse {
     @AllArgsConstructor
     public static class ClassInfo{
         private Class<?> clazz;
-        private String fieldName;
         private List<String> pathList;
         private Object obj;
     }
@@ -216,8 +220,6 @@ public class ObjDictParse {
     @ToString
     public static class Level {
         private List<String> pathList;
-        private Object dictValue;
-        private String dictCode;
         private String dictText;
         private String parsedValueStr;
     }

@@ -19,7 +19,7 @@ public class A {
     public static A getInstance(){
         A a = new A();
         C c = new C("c1", "c2");
-        B b = new B("b1","b2",c);
+        B b = new B("b1","b2",c,Arrays.asList(c,c));
         a.setA2("a2");
         a.setB(b);
         a.setC(c);
