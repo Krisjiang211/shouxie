@@ -1,19 +1,12 @@
 package com.jiang.singlelearningdemo;
 
-import jakarta.annotation.PostConstruct;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.ConfigurableApplicationContext;
-
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @SpringBootApplication
 @MapperScan("com.jiang.singlelearningdemo.common.mapper")

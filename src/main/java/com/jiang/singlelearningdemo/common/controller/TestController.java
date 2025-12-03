@@ -15,6 +15,8 @@ import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -39,6 +41,44 @@ public class TestController {
     public void init(){
         System.out.println("ApplicationContext.hashCode() = " + context.hashCode());
     }
+
+    List<String> xingList =List.of("张","李","王","赵","钱","周","吴","郑","孔");
+    List<String> mingList =List.of("三","四","五","六","七","八","九","十","十一");
+    List<String> nameList =List.of("豪","宝","杰","强","亮","天","时","事","下");
+
+    @GetMapping("test/get")
+    public User testGet(){
+        User user = userService.getById(1);
+        return user;
+    }
+
+    @GetMapping("one")
+    public User testGeById(@RequestParam Long id){
+        return userService.getById(id);
+    }
+
+
+    @GetMapping("test/get/all")
+    public List<User> testGetAll(){
+        return userService.list();
+    }
+
+    @GetMapping("test/insert")
+    public String testInsert(){
+        User user = new User();
+        user.setName(getRandomName());
+        user.setAge((int)(Math.random()*100));
+        userService.save(user);
+        return "success";
+    }
+    private String getRandomName(){
+        int xingIndex = (int)(Math.random()*xingList.size());
+        int mingIndex = (int)(Math.random()*mingList.size());
+        int nameIndex = (int)(Math.random()*nameList.size());
+        return xingList.get(xingIndex)+mingList.get(mingIndex)+nameList.get(nameIndex);
+    }
+
+
 
     @PostMapping("ok")
     public Map<String,Object> ok(@ReqBodyTime Map<String,Object> map){

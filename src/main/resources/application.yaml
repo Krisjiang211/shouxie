@@ -7,14 +7,37 @@ spring:
 #      port: 6379
 #      database: 0
   # ?????
-
+#  autoconfigure:
+#    exclude:
+#      - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
   datasource:
-    type: com.alibaba.druid.pool.DruidDataSource
-    druid:
-      url: jdbc:mysql://localhost:3306/test
-      username: root
-      password: 801219Abc***
-      driver-class-name: com.mysql.cj.jdbc.Driver
+    dynamic:
+      primary: master
+      datasource:
+        master:
+          url: jdbc:mysql://localhost:3306/test?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&nullCatalogMeansCurrent=true
+          username: root
+          password: 801219Abc***
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+        pg:
+          url: jdbc:postgresql://192.168.60.88:5432/test?currentSchema=public
+          username: admin
+          password: password
+          driver-class-name: org.postgresql.Driver
+          type: com.alibaba.druid.pool.DruidDataSource
+logging:
+  level:
+    com.alibaba.druid: DEBUG
+    com.baomidou.dynamic: TRACE
+
+#
+#    type: com.alibaba.druid.pool.DruidDataSource
+#    druid:
+#      url: jdbc:mysql://localhost:3306/test
+#      username: root
+#      password: 801219Abc***
+#      driver-class-name: com.mysql.cj.jdbc.Driver
 
 # ?????
 server:
@@ -34,3 +57,4 @@ mybatis-plus:
       id-type: auto
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
